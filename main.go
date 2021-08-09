@@ -8,10 +8,13 @@ import (
 )
 
 func main(){
+    fmt.Printf("\n\n -------------------------------------------------------\n")
+    fmt.Printf("1. Search Manga\n2. Download Manga\n3. Update Manga Database\n4. Exit\n*If its your first time, Update Manga Database\n")
+    fmt.Printf("\nEnter Choice: ")
+
     for {
         var choice string;
 
-        fmt.Printf("1. Search Manga\n2. Download Manga\n3. Update Manga Database\n4. Exit\n*If its your first time, Update Manga Database\n")
         fmt.Scanln(&choice)
 
         switch choice {
@@ -37,15 +40,19 @@ func main(){
             utils.CreateDir("./Manga")
             utils.CreateDir("./Manga/"+ title)
             utils.SyncManga(title, url)
+
+            fmt.Println("Enter 4 to Exit.")
             break;
         case "3":
             utils.UpdateMangaList()
             break;
         case "4":
+            fmt.Println("Enjoy Reading Manga. :)")
             os.Exit(3)
             break;
         default:
-            os.Exit(3)
+            fmt.Printf("\nEnter Choice: ")
+            break;
         }
     }
 }
