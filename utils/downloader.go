@@ -39,7 +39,7 @@ func DownloadFileHandler(dirName string, url string) {
 
     fileName, err := FileNameParse(url)
     check(err)
-    filePath := "./" + dirName + "/" + fileName + ".cbr"
+    filePath := "./Manga/" + dirName + "/" + fileName + ".cbr"
     out, _ := os.Create(filePath)
 
     defer out.Close();

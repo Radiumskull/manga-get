@@ -93,7 +93,7 @@ func SyncManga(title string, url string) {
         DownloadFileHandler(title, baseURL + link)
     })
 
-    c.Visit(url)
+    c.Visit(baseURL + url)
 }
 
 func FetchFromDatabase(name string){

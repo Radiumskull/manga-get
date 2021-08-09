@@ -2,25 +2,50 @@ package main
 
 import (
     "fmt"
+    "os"
     "manget/utils"
-)
-
-
-var (
-    baseURL = "https://w12.mangafreak.net/"
-    libraryURL = "https://w12.mangafreak.net/Mangalist/All/"
+    "strconv"
 )
 
 func main(){
+    for {
+        var choice string;
 
-    //utils.UpdateMangaList()
-    //utils.FetchFromDatabase("Akame")
+        fmt.Printf("1. Search Manga\n2. Download Manga\n3. Update Manga Database\n4. Exit\n*If its your first time, Update Manga Database\n")
+        fmt.Scanln(&choice)
 
-    title, url, err := utils.FetchMangaPageLink(3345)
-    if err != nil {
-        fmt.Println(err.Error())
+        switch choice {
+        case "1":
+            var input string
+            fmt.Printf("Enter Manga Name: ")
+            fmt.Scanf("%s", &input)
+
+            utils.FetchFromDatabase(input)
+            break;
+        case "2":
+            var input string
+            fmt.Printf("Enter Manga ID: ")
+            fmt.Scanf("%s", &input)
+
+            mangaId, _ := strconv.Atoi(input)
+            title, url, err := utils.FetchMangaPageLink(mangaId)
+            if err != nil{
+                fmt.Println(err.Error())
+                os.Exit(3)
+            }
+
+            utils.CreateDir("./Manga")
+            utils.CreateDir("./Manga/"+ title)
+            utils.SyncManga(title, url)
+            break;
+        case "3":
+            utils.UpdateMangaList()
+            break;
+        case "4":
+            os.Exit(3)
+            break;
+        default:
+            os.Exit(3)
+        }
     }
-
-    utils.CreateDir(title)
-    utils.SyncManga(title, baseURL + url)
 }
