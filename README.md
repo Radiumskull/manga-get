@@ -10,9 +10,18 @@ Third-Party Packages Used:
 <li> github.com/mattn/go-sqlite3
 </ul>
 
+How to Use:
+Prerequisites: Install go and add path to environmnet.
+1. Clone the Repo
+2. Execute 'go install' from the project root directory
+
+
 Future Updates:
-1. I wish to package this into CLI app in future.
+1. I wish to package this into CLI app in future. [ Done ]
 2. Sometimes the Mangafreak url changes which needs to be dynamic.
 3. The Scrapping to not Concurrent. It takes around 309secs to update database.
+
+Issues:
+1. CLI only works in the project root directory.
 
 Developer: Aritra Bhattacharjee(RadiumSkull)
