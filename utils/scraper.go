@@ -13,10 +13,11 @@ import (
 )
 
 var (
-	baseURL    = "https://w12.mangafreak.net/"
-	libraryURL = "https://w12.mangafreak.net/Mangalist/All/"
-	dirPath    = "/Documents/mangafreak.db"
-	osPath     string
+	baseURL                  = "https://w12.mangafreak.net/"
+	libraryURL               = "https://w12.mangafreak.net/Mangalist/All/"
+	dirPath                  = "/Documents/mangafreak.db"
+	osPath                   string
+	maxConcurrentConnections = 16
 )
 
 func updateMangaListHandler(page int) {
@@ -45,8 +46,6 @@ func updateMangaListHandler(page int) {
 
 // This Function iterates through all the pages of mangafreak website and lists all the manga and updates mangafreak.db file
 func UpdateMangaList() {
-	maxConcurrentConnections := 16
-
 	user, _ := user.Current()
 	database, _ := sql.Open("sqlite3", user.HomeDir+"/"+dirPath)
 
@@ -92,6 +91,9 @@ func SyncManga(title string, url string) {
 
 	c := colly.NewCollector()
 
+	concManager := make(chan struct{}, maxConcurrentConnections)
+	var wg sync.WaitGroup
+
 	c.OnRequest(func(r *colly.Request) {
 		fmt.Println("Visiting", r.URL.String())
 	})
@@ -102,8 +104,15 @@ func SyncManga(title string, url string) {
 
 	c.OnHTML(".manga_series_list > table > tbody > tr > td:last-child > a", func(e *colly.HTMLElement) {
 		link := e.Attr("href")
+		wg.Add(1)
+		go func(title string, url string) {
+			defer wg.Done()
+			concManager <- struct{}{}
+			DownloadFileHandler(title, url)
+			<-concManager
+		}(title, baseURL+link)
 
-		DownloadFileHandler(title, baseURL+link)
+		wg.Wait()
 	})
 
 	c.Visit(baseURL + url)

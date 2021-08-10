@@ -14,8 +14,10 @@ func main() {
 	app := &cli.App{
 		Commands: []*cli.Command{
 			&cli.Command{
-				Name:  "search",
-				Usage: "manget search Akame ga kill",
+				Name:        "search",
+				Aliases:     []string{"s"},
+				Usage:       "manget search Akame ga kill",
+				Description: "Search for the Manga you want and retrieve the Manga id which you can use to download using download command",
 				Action: func(c *cli.Context) error {
 					if c.NArg() != 1 {
 						return errors.New("Invalid Syntax")
@@ -27,16 +29,19 @@ func main() {
 				},
 			},
 			&cli.Command{
-				Name:  "sync",
-				Usage: "manget sync",
+				Name:        "sync",
+				Usage:       "manget sync",
+				Description: "Update/Build the Database for the Manga",
 				Action: func(_ *cli.Context) error {
 					utils.UpdateMangaList()
 					return nil
 				},
 			},
 			&cli.Command{
-				Name:  "download",
-				Usage: "manget download 201",
+				Name:        "download",
+				Aliases:     []string{"d"},
+				Usage:       "manget download 201",
+				Description: "Download the Manga you want using the MangaId you retrieved from Search",
 				Action: func(c *cli.Context) error {
 					if c.NArg() != 1 {
 						return errors.New("Invalid Syntax")
