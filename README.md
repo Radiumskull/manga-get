@@ -22,6 +22,6 @@ Future Updates:
 3. The Scrapping to not Concurrent. It takes around 309secs to update database.[ Done ]
 
 Issues:
-1. CLI only works in the project root directory.
+1. CLI only works in the project root directory.[ Fixed ] ( Tested only on Windows )
 
 Developer: Aritra Bhattacharjee(RadiumSkull)
