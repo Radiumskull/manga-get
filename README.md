@@ -19,7 +19,7 @@ Prerequisites: Install go and add path to environmnet.
 Future Updates:
 1. I wish to package this into CLI app in future. [ Done ]
 2. Sometimes the Mangafreak url changes which needs to be dynamic.
-3. The Scrapping to not Concurrent. It takes around 309secs to update database.
+3. The Scrapping to not Concurrent. It takes around 309secs to update database.[ Done ]
 
 Issues:
 1. CLI only works in the project root directory.

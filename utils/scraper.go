@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os/user"
 	"strconv"
+	"sync"
 
 	"github.com/gocolly/colly"
 
@@ -28,13 +29,11 @@ func updateMangaListHandler(page int) {
 
 	c.OnHTML(".list_item > .list_item_info > h3 > a[href]", func(e *colly.HTMLElement) {
 		link := e.Attr("href")
-		//fmt.Println(reflect.TypeOf(e.Text), reflect.TypeOf(link))
 		insert.Exec(e.Text, link)
 	})
 
 	c.OnScraped(func(r *colly.Response) {
 		fmt.Printf("Finished Scraping Page %d\n", page)
-		//wg.Done()
 	})
 
 	c.OnError(func(r *colly.Response, err error) {
@@ -46,6 +45,8 @@ func updateMangaListHandler(page int) {
 
 // This Function iterates through all the pages of mangafreak website and lists all the manga and updates mangafreak.db file
 func UpdateMangaList() {
+	maxConcurrentConnections := 16
+
 	user, _ := user.Current()
 	database, _ := sql.Open("sqlite3", user.HomeDir+"/"+dirPath)
 
@@ -54,12 +55,21 @@ func UpdateMangaList() {
 
 	dropTable.Exec()
 	createTable.Exec()
+
+	concManager := make(chan struct{}, maxConcurrentConnections)
+	var wg sync.WaitGroup
+
 	for page := 1; page <= 309; page++ {
-		//wg.Add(1)
-		updateMangaListHandler(page)
+		wg.Add(1)
+		go func(page int) {
+			defer wg.Done()
+			concManager <- struct{}{}
+			updateMangaListHandler(page)
+			<-concManager
+		}(page)
 	}
 
-	//wg.Wait()
+	wg.Wait()
 }
 
 func FetchMangaPageLink(id int) (string, string, error) {
