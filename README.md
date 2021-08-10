@@ -1,6 +1,6 @@
 <h3> Manga-Get </h3>
 
-This web-scrapper built using Golang which scrapes MangaFreak and maintains a database and downloads all the manga chapters from the website a once.
+This is a web-scrapper built using Golang which scrapes MangaFreak to maintain a database. It can then download all the manga chapters of a selected Manga at once.
 
 Now it contains 5000 Manga which it can download.
 
