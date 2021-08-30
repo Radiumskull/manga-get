@@ -3,6 +3,8 @@ package utils
 import (
 	"database/sql"
 	"fmt"
+	"log"
+	"net/http"
 	"os/user"
 	"strconv"
 	"sync"
@@ -13,14 +15,13 @@ import (
 )
 
 var (
-	baseURL                  = "https://w12.mangafreak.net/"
-	libraryURL               = "https://w12.mangafreak.net/Mangalist/All/"
+	libraryURL               = "/Mangalist/All/"
 	dirPath                  = "/Documents/mangafreak.db"
 	osPath                   string
 	maxConcurrentConnections = 16
 )
 
-func updateMangaListHandler(page int) {
+func updateMangaListHandler(page int, baseURL string) {
 	user, _ := user.Current()
 	database, _ := sql.Open("sqlite3", user.HomeDir+"/"+dirPath)
 
@@ -41,13 +42,14 @@ func updateMangaListHandler(page int) {
 		fmt.Println("Request URL:", r.Request.URL, "\nError:", err)
 	})
 
-	c.Visit(libraryURL + strconv.Itoa(page))
+	c.Visit(baseURL + libraryURL + strconv.Itoa(page))
 }
 
 // This Function iterates through all the pages of mangafreak website and lists all the manga and updates mangafreak.db file
 func UpdateMangaList() {
 	user, _ := user.Current()
 	database, _ := sql.Open("sqlite3", user.HomeDir+"/"+dirPath)
+	baseURL := GetBaseURL()
 
 	createTable, _ := database.Prepare("CREATE TABLE IF NOT EXISTS Manga(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, url TEXT)")
 	dropTable, _ := database.Prepare("DROP TABLE IF EXISTS Manga")
@@ -63,7 +65,7 @@ func UpdateMangaList() {
 		go func(page int) {
 			defer wg.Done()
 			concManager <- struct{}{}
-			updateMangaListHandler(page)
+			updateMangaListHandler(page, baseURL)
 			<-concManager
 		}(page)
 	}
@@ -88,9 +90,8 @@ func FetchMangaPageLink(id int) (string, string, error) {
 }
 
 func SyncManga(title string, url string) {
-
 	c := colly.NewCollector()
-
+	baseURL := GetBaseURL()
 	concManager := make(chan struct{}, maxConcurrentConnections)
 	var wg sync.WaitGroup
 
@@ -110,7 +111,7 @@ func SyncManga(title string, url string) {
 			concManager <- struct{}{}
 			DownloadFileHandler(title, url)
 			<-concManager
-		}(title, baseURL+link)
+		}(title, link)
 
 		wg.Wait()
 	})
@@ -142,4 +143,18 @@ func FetchFromDatabase(name string) {
 		fmt.Printf("%d : %s\n", id, title)
 	}
 	fmt.Println("Records Ended.")
+}
+
+func GetBaseURL() string {
+	baseURLs := []string{"https://w11.mangafreak.net/", "https://w12.mangafreak.net/"}
+
+	for i := 0; i < len(baseURLs); i++ {
+		res, err := http.Get(baseURLs[i])
+		if err == nil && res.StatusCode == 200 {
+			return baseURLs[i]
+		}
+	}
+
+	log.Fatal("Error Conencting Server")
+	return ""
 }
